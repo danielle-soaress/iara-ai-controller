@@ -1,0 +1,24 @@
+services:
+  ollama:
+    image: ollama/ollama:latest
+    container_name: iara-ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama-models:/root/.ollama
+
+  iara-ai-controller:
+    build: .
+    container_name: iara-ai-controller
+    depends_on:
+      - ollama
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./:/app
+    environment:
+      - OLLAMA_HOST=http://ollama:11434
+      - FLASK_APP=main.py
+
+volumes:
+  ollama-models:

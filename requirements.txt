@@ -1,0 +1,4 @@
+flask
+ollama
+edge-tts
+asyncio
