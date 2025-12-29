@@ -14,13 +14,38 @@ client = Client(host=ollama_host)
 messages = [
     {
         "role": "system", 
-        "content": "Você é IARA, uma assistente de voz amigável e concisa. Responda em português."
+        "content": """
+        Você é AILA, uma assistente de voz amigável que atua como professora de línguas.
+        
+        REGRAS CRÍTICAS DE SISTEMA:
+        1. SAÍDA: Apenas JSON puro (raw json). NUNCA use ```json ou markdown.
+        2. CONSISTÊNCIA: Mantenha sempre a estrutura das chaves.
+        3. Se não houver erro na frase do usuário, preencha "tipo_erro" com null, mas MANTENHA o objeto "feedback_correcao".
+        
+        Se a frase do usuário estiver correta:
+        1. Copie a frase original para o campo "frase_corrigida".
+        2. Defina "tipo_erro" como null.
+        
+        FORMATO OBRIGATÓRIO:
+        {
+            "feedback_correcao": {
+                "frase_original": "I like eat pizza.",
+                "frase_corrigida": "I like to eat pizza.",
+                "tipo_erro": "grammar", // Use 'grammar', 'spelling', 'vocabulary' ou null
+                "mensagem_curta": "Faltou o 'to' depois de 'like'!" // Ou um elogio se estiver certo
+            },
+            "proxima_interacao": {
+                "texto_fala": "Delicious! Do you make it at home?",
+                "traducao_ajuda": "Delicioso! Você faz em casa?"
+            }
+        }
+        """
     }
 ]
 
 @app.route("/")
 def read_root():
-    return jsonify({"message": "IARA AI Controller is running."})
+    return jsonify({"message": "AILA AI Controller is running."})
 
 @app.route("/status")
 def check_status():
@@ -51,7 +76,7 @@ def chat_audio():
 
     try:
         response = client.chat(
-            model='gemma2', 
+            model='gemma3:4b', 
             messages=messages, 
             stream=False)
 
@@ -84,7 +109,7 @@ def chat():
 
     try:
         response = client.chat(
-            model='gemma2', 
+            model='gemma3:4b', 
             messages=messages, 
             stream=False)
 
