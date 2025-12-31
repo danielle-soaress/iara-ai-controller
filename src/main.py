@@ -5,43 +5,23 @@ import asyncio
 
 from flask import Flask, jsonify, request, send_file
 from ollama import Client
+from config import gerar_system_prompt
 
 app = Flask(__name__)
 
 ollama_host = os.getenv('OLLAMA_HOST', 'http://localhost:11434')
 client = Client(host=ollama_host)
 
+dados = request.json
+tema_solicitado = dados.get("theme", "F") 
+lingua = dados.get("conversation_language", "EN")
+
+system_content = gerar_system_prompt(lingua, tema_solicitado)
+
 messages = [
-    {
-        "role": "system", 
-        "content": """
-        Você é AILA, uma assistente de voz amigável que atua como professora de línguas.
-        
-        REGRAS CRÍTICAS DE SISTEMA:
-        1. SAÍDA: Apenas JSON puro (raw json). NUNCA use ```json ou markdown.
-        2. CONSISTÊNCIA: Mantenha sempre a estrutura das chaves.
-        3. Se não houver erro na frase do usuário, preencha "tipo_erro" com null, mas MANTENHA o objeto "feedback_correcao".
-        
-        Se a frase do usuário estiver correta:
-        1. Copie a frase original para o campo "frase_corrigida".
-        2. Defina "tipo_erro" como null.
-        
-        FORMATO OBRIGATÓRIO:
-        {
-            "feedback_correcao": {
-                "frase_original": "I like eat pizza.",
-                "frase_corrigida": "I like to eat pizza.",
-                "tipo_erro": "grammar", // Use 'grammar', 'spelling', 'vocabulary' ou null
-                "mensagem_curta": "Faltou o 'to' depois de 'like'!" // Ou um elogio se estiver certo
-            },
-            "proxima_interacao": {
-                "texto_fala": "Delicious! Do you make it at home?",
-                "traducao_ajuda": "Delicioso! Você faz em casa?"
-            }
-        }
-        """
-    }
+    {"role": "system", "content": system_content},
 ]
+
 
 @app.route("/")
 def read_root():
